@@ -20,7 +20,7 @@ public:
         spring_const_m = 5;
         spring_const_c = -14;
 
-        rest_pos = 0;
+        rest_pos = 15;
     }
 };
 

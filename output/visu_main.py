@@ -14,13 +14,13 @@ except serial.SerialException as e:
     print(f"Error opening serial port: {e}")
     exit()
 
-try:
-    csv_file = open('output/data/data.csv', mode='w', newline='')
-    csv_writer = csv.writer(csv_file)
-    csv_writer.writerow(['Time', 'Speed_des', 'Speed_mes', 'motor1_input', 'motor2_input', 'position_des', 'position'])
-    print("CSV header written successfully.")
-except Exception as e:
-    print(f"An error occurred: {e}")    
+#try:
+#    csv_file = open('output/data/data.csv', mode='w', newline='')
+#    csv_writer = csv.writer(csv_file)
+#    csv_writer.writerow(['Time', 'Speed_des', 'Speed_mes', 'motor1_input', 'motor2_input', 'position_des', 'position'])
+#    print("CSV header written successfully.")
+#except Exception as e:
+#    print(f"An error occurred: {e}")    
 
 app = pg.mkQApp("Serial Plotter")
 win = pg.GraphicsLayoutWidget(show=True, title="Serial Data Plot")
@@ -76,7 +76,7 @@ def update():
             pos_des.append(pos_des_)
             pos.append(pos_)
             print(f"{time_}, {speed_des_}, {speed_mes_}, {motor1_input_}, {motor2_input_}, {pos_des_}, {pos_}")
-            csv_writer.writerow([time_, speed_des_, speed_mes_, motor1_input_, motor2_input_, pos_des_, pos_])
+            #csv_writer.writerow([time_, speed_des_, speed_mes_, motor1_input_, motor2_input_, pos_des_, pos_])
 
             max_points = 200
             if len(time) > max_points:
@@ -98,7 +98,7 @@ def update():
         elif line == "running" or line == "on":
             
             print(" ")
-            csv_writer.writerow([])
+            #csv_writer.writerow([])
             time.clear()
             speed_des.clear()
             speed_mes.clear()
@@ -119,5 +119,5 @@ timer.start(50)
 
 if __name__ == '__main__':
     pg.exec()
-    csv_file.close()
+    #csv_file.close()
     print("Serial connection and CSV file closed.")
