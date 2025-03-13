@@ -31,7 +31,7 @@ plot1 = win.addPlot(row=0, col=0, colspan=2, title="Desired Speed vs Measured Sp
 plot1.addLegend()
 curve1_desired = plot1.plot(pen='b', name="Desired Speed")
 curve1_measured = plot1.plot(pen='r', name="Measured Speed")
-plot1.setYRange(-1, 5)  
+plot1.setYRange(-5, 5)  
 
 
 plot2 = win.addPlot(row=1, col=0, title="Motor Inputs")
@@ -43,6 +43,7 @@ plot3 = win.addPlot(row=1, col=1, title="pos")
 plot3.addLegend()
 curve3_pos_des = plot3.plot(pen='b', name="pos_des")
 curve3_pos = plot3.plot(pen='r', name="pos")
+plot3.setYRange(-5, 25)
 
 time = []
 speed_des = []
