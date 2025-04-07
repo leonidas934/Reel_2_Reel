@@ -43,7 +43,7 @@ void Encoder::step() {
     if (digitalRead(B_pin) == LOW) {
         _buffer.add(pulse_speed);  
     } else {
-        _buffer.add(-pulse_speed);
+        _buffer.add(pulse_speed);
     }
 }
 

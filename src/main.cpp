@@ -19,11 +19,16 @@ Breake_motor breake_motor(_board, MAX_TORQUE);
 
 state_machine kernel(_board);
 reel_2_reel_sys reel_2_reel;
-PID pos_controller(0,0.005,0,0, 90); //0.05,0.001,0,0, 90
-PID speed_controller(0,0.005,0,0, 300);
+PID pos_controller(0,0.01,0,0, 90); // 90% de torque max
+//PID speed_controller(38,0.0271,35470,0, 450); // PID pour Vitesse_des = 50, 450 = 90% de MAX_speed
+//PID speed_controller(30,0.0065,15200,0, 450); // PID pour vitesse_des = 10
+double Kp_des = (Vitesse_des-10)/65*8+30;
+double Ki_des = (Vitesse_des-10)/65*0.0206+0.0065;
+double Kd_des = (Vitesse_des-10)/65*20270+15200;
+PID speed_controller(Kp_des,Ki_des,Kd_des,0, 450); //Approx lineaire des deux PID
 
 mv_average_filter speed_filter(filter_size);
-
+double test = 0.0;
 
 void encoder_step() {
  _board._encoder.step();
@@ -47,16 +52,15 @@ void change_direction(){
   if (kernel.state != off)
   {
   speed_motor.change_direction();
-  //breake_motor.change_direction();
   }
 }
 
-void print_results(double time, double speed_des, double speed_smooth, double input_speed, double input_breake, double des_pos, double pos){
+void print_results(double time, double moving_speed, double speed_smooth, double input_speed, double input_breake, double des_pos, double pos, double test){
   Serial.print(time/1000);
     Serial.print(" ,");
-    Serial.print(speed_des);
+    Serial.print(moving_speed);
     Serial.print(" ,");
-    Serial.print(speed_smooth, 4);
+    Serial.print(speed_smooth);
     Serial.print(" ,");
     Serial.print(double(input_speed)/ICR4 *100);
     Serial.print(" ,");
@@ -64,21 +68,21 @@ void print_results(double time, double speed_des, double speed_smooth, double in
     Serial.print(" ,");
     Serial.print(des_pos);
     Serial.print(" ,");
-    Serial.println(pos);
+    Serial.print(pos);
+    Serial.print(" ,");
+    Serial.println(test);
 }
 
 
 
 
  void main_loop(){
-
   switch (kernel.state)
   {
   case off:{
     digitalWrite(led_pin, LOW);
     speed_motor.enable();
     breake_motor.enable();
-    // pos_controller.offset = 0;
 
     break;
 
@@ -90,12 +94,11 @@ void print_results(double time, double speed_des, double speed_smooth, double in
     digitalWrite(led_pin, HIGH);
     double time = kernel.get_time();
 
-    double breake_des_start_pos = pos_controller.output(reel_2_reel.rest_pos, _board._pos_sensor.get_pos(), time); //
+    double breake_des_start_pos = pos_controller.output(rest_pos, _board._pos_sensor.get_pos(), time);
     int input_breake_start_pos = breake_motor.get_dc(breake_des_start_pos);
     breake_motor.set(int(input_breake_start_pos));
     
-    print_results(millis()-kernel.start_time, 0, 0, 0, input_breake_start_pos, reel_2_reel.rest_pos, _board._pos_sensor.get_pos());
-    
+    print_results(millis()-kernel.start_time, 0, 0, 0, input_breake_start_pos, rest_pos, _board._pos_sensor.get_pos(), test);
 
     break;
   }
@@ -109,16 +112,16 @@ void print_results(double time, double speed_des, double speed_smooth, double in
     
     double pos = _board._pos_sensor.get_pos();
 
-    double breake_des = pos_controller.output(des_pos, pos, time);    
+    double breake_des = pos_controller.output(des_pos, pos, time);
     double speed_des = speed_controller.output(moving_speed, speed_smooth, time);
-
+    double test = speed_des;
     int input_speed = speed_motor.get_dc(speed_des);
     int input_breake = breake_motor.get_dc(breake_des);
     speed_motor.set(int(input_speed));
     breake_motor.set(int(input_breake));
 
 
-    print_results(millis()-kernel.start_time, moving_speed, speed_smooth, input_speed, input_breake, des_pos, pos);
+    print_results(millis()-kernel.start_time, moving_speed, speed_smooth, input_speed, input_breake, des_pos, pos, test);
     break;
     }
   }
@@ -134,7 +137,6 @@ Timer1.attachInterrupt(main_loop);
 
 _board.init();
 kernel.change_state();
-reel_2_reel.rest_pos = _board._pos_sensor.get_pos();
 
 attachInterrupt(digitalPinToInterrupt(encoderPinA), encoder_step, RISING);
 attachInterrupt(digitalPinToInterrupt(on_off_pin), change_state, CHANGE);
