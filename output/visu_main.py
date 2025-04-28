@@ -30,10 +30,10 @@ win.resize(1200, 800)
 win.move(400,100)
 win.setWindowTitle("Real-Time Data Plot")
 
-plot1 = win.addPlot(row=0, col=0, colspan=2, title="Vitesse du systeme")
+plot1 = win.addPlot(row=0, col=0, colspan=2, title="Desired Speed vs Measured Speed")
 plot1.addLegend()
-curve1_desired = plot1.plot(pen='b', name="Vitesse desire")
-curve1_measured = plot1.plot(pen='r', name="Vitesse mesure")
+curve1_desired = plot1.plot(pen='b', name="Desired Speed")
+curve1_measured = plot1.plot(pen='r', name="Measured Speed")
 
 plot1.setLabel(axis='left', text='Vitesse (cm/min)')
 plot1.setLabel(axis='bottom', text='Temps (s)')
@@ -41,13 +41,13 @@ plot1.setLabel(axis='bottom', text='Temps (s)')
 
 plot2 = win.addPlot(row=1, col=0, title="Motor Inputs")
 plot2.addLegend()
-curve2_motor1 = plot2.plot(pen='g', name="% Motor Vitesse Input")
-curve2_motor2 = plot2.plot(pen='y', name="% Motor Tension Input")
+curve2_motor1 = plot2.plot(pen='g', name="Motor Input 1")
+curve2_motor2 = plot2.plot(pen='y', name="Motor Input 2")
 
-plot3 = win.addPlot(row=1, col=1, title="Tension du systeme")
+plot3 = win.addPlot(row=1, col=1, title="pos")
 plot3.addLegend()
-curve3_pos_des = plot3.plot(pen='b', name="Tension desire")
-curve3_pos = plot3.plot(pen='r', name="Tension mesuree")
+curve3_pos_des = plot3.plot(pen='b', name="pos_des")
+curve3_pos = plot3.plot(pen='r', name="pos")
 #plot3.setYRange(-5, 25)
 
 time = []
@@ -68,13 +68,13 @@ def update():
         values = line.split(',')  
 
         if len(values) == 8:
-            time_ = round(float(values[0])/retard_temps, 1) # Tenir compte du decalage dans le temps de l'horloge du arduino pour l'affichage
-            moving_speed_ = round(float(values[1])*dia_encoder*np.pi*retard_temps, 1) # Transformer la vitesse de rotation en vitesse lineaire
-            speed_mes_ = round(float(values[2])*dia_encoder*np.pi*retard_temps, 1) # Transformer la vitesse de rotation en vitesse lineaire
+            time_ = round(float(values[0])/retard_temps, 1)
+            moving_speed_ = round(float(values[1])*dia_encoder*np.pi*retard_temps, 1)
+            speed_mes_ = round(float(values[2])*dia_encoder*np.pi*retard_temps, 1)
             motor1_input_ = round(float(values[3]), 1)
             motor2_input_ = round(float(values[4]), 1)
-            pos_des_ = round((float(values[5])-8)/14*100, 0) # Transformer la position en tension pour l'affichage
-            pos_ = round((float(values[6])-8)/14*100, 0) # Transformer la position en tension pour l'affichage
+            pos_des_ = float(values[5])
+            pos_ = round(float(values[6]), 1)
             test_ = float(values[7])
 
             time.append(time_)

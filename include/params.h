@@ -11,8 +11,8 @@ unsigned long lDt = 100*1e3;
 const int filter_size = 20;
 
 // Utilisateur
-double Vitesse_des = 40; // cm/min - Vitesse_max = 75 cm/min
-double Tension_des = 40; // Tension entre 0 et 100
+double Vitesse_des = 50; // cm/min - Vitesse_max = 75 cm/min
+double Tension_des = 50; // Tension entre 0 et 100
 
 // Speed- and Torque Motor params
 double des_pos = Tension_des/100*14+8; // Convertion de la tension en position entre 8 mm et 22 mm
