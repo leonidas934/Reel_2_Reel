@@ -35,7 +35,7 @@ public:
 void Encoder::step() {
     unsigned long current_time = millis();
     pulse_interval = current_time - last_pulse_time;
-
+    if (pulse_interval == 0) return;
     double pulse_speed = (60.0 * 1e3) / (double(pulses_per_rev) * pulse_interval);
     
     last_pulse_time = current_time;
@@ -59,29 +59,13 @@ Encoder::Encoder(int A_pin, int B_pin)
 
 
 double Encoder::get_speed(){
-    if (count%10==0)
-    {
-        /* code */
-    }
-    
     double average_speed = _buffer.get_average();
-    if (average_speed == 0)
-    {// Serial.println(" 0");
-     return 0;}
+    if (average_speed == 0.0)
+    {
+    return 0.0;}
     else
     {
-        /*
-        Serial.print("average: "); Serial.println(average_speed);
-    for (int i = 0; i < _buffer.get_count(); i++)
-    {
-        Serial.print(_buffer.data[i]); Serial.print(" , ");
-    }
-    Serial.println(" ");
-        */
-    
-    
     _buffer.clear();
-
     return average_speed;
     }
     

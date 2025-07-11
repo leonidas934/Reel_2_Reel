@@ -20,7 +20,7 @@ public:
     
 
     int get_count();
-    int get_sum();
+    double get_sum();
 };
 
 buffer::buffer() {
@@ -62,7 +62,7 @@ int buffer::get_count(){
     return count;
 }
 
-int buffer::get_sum(){
+double buffer::get_sum(){
     return sum;
 }
 

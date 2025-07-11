@@ -22,10 +22,10 @@ reel_2_reel_sys reel_2_reel;
 PID pos_controller(0,0.01,0,0, 90); // 90% de torque max
 //PID speed_controller(38,0.0271,35470,0, 450); // PID pour Vitesse_des = 50, 450 = 90% de MAX_speed
 //PID speed_controller(30,0.0065,15200,0, 450); // PID pour vitesse_des = 10
-double Kp_des = (Vitesse_des-10)/65*8+30;
+double Kp_des = (Vitesse_des-10)/65*8+25;
 double Ki_des = (Vitesse_des-10)/65*0.0206+0.0065;
-double Kd_des = (Vitesse_des-10)/65*20270+15200;
-PID speed_controller(Kp_des,Ki_des,Kd_des,0, 450); //Approx lineaire des deux PID
+double Kd_des = (Vitesse_des-10)/65*20270+13000;
+PID speed_controller(Kp_des,Ki_des,Kd_des,0, 100); //Approx lineaire des deux PID
 
 mv_average_filter speed_filter(filter_size);
 double test = 0.0;
@@ -114,7 +114,7 @@ void print_results(double time, double moving_speed, double speed_smooth, double
 
     double breake_des = pos_controller.output(des_pos, pos, time);
     double speed_des = speed_controller.output(moving_speed, speed_smooth, time);
-    double test = speed_des;
+    double test = speed;
     int input_speed = speed_motor.get_dc(speed_des);
     int input_breake = breake_motor.get_dc(breake_des);
     speed_motor.set(int(input_speed));

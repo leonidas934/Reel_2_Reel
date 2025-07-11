@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include "motor.h"
+#include "params.h"
 
 class Speed_motor : public Motor
 {
@@ -31,7 +32,7 @@ Speed_motor::Speed_motor(Board& board, int max_value) : Motor(board, max_value)
 
 void Speed_motor:: init(){
     digitalWrite(enable_pin, HIGH);
-    direction = false;
+    direction = Etat_dir;
     digitalWrite(dir_pin, direction);
 }
 

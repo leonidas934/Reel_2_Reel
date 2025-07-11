@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include "motor.h"
 #include "linear_curve.h"
+#include "params.h"
 
 class Breake_motor : public Motor
 {
@@ -30,8 +31,8 @@ Breake_motor::Breake_motor(Board& board, int max_value) : Motor(board, max_value
 
 void Breake_motor:: init(){
     digitalWrite(enable_pin, HIGH);
-    direction = true;
-    digitalWrite(dir_pin, direction);
+    direction = !Etat_dir;
+    digitalWrite(dir_pin, !direction);
 }
 
 

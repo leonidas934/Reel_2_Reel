@@ -7,13 +7,13 @@
 class Motor
 {   
 public:
+    Board& _board;
     int MAX_VALUE;
     int last_time;
     int pulse_intervall;
     bool direction;
 
     int feedback_pin; int control_pin; int dir_pin; int enable_pin;
-    Board& _board;
 
     void set(double value);
     void enable();
@@ -38,7 +38,7 @@ void Motor::set(double value){
 
 
 void Motor::change_direction(){
-    Serial.println("change dir");
+    Serial.println("Change direction");
     direction = !direction;
     digitalWrite(dir_pin, direction);
 }

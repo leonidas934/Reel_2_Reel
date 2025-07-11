@@ -1,11 +1,11 @@
 #ifndef MV_AVERAGE_FILTER_H
 #define MV_AVERAGE_FILTER_H
-
+#include <math.h>
 class mv_average_filter {
 private:
+    int count;
     int MAX_SIZE; // Define a fixed size
     double* data;
-    int count;
 
 public:
     mv_average_filter(int _max_size) : count(0), MAX_SIZE(_max_size) {
@@ -13,6 +13,7 @@ public:
     }
 
     void push(double value) {
+        if (isnan(value) || isinf(value)) return;
         if (count == MAX_SIZE) {
             // Shift the elements to make space for the new value
             for (int i = MAX_SIZE - 1; i > 0; --i) {
@@ -38,7 +39,9 @@ public:
         for (int i = 0; i < count; ++i) {
             sum += data[i];
         }
-        return sum / count;
+        double avg = sum / count;
+        //if (isnan(avg) || isinf(avg)) return 0.0; // Return safe value
+        return avg;
     }
 
     void init() {
@@ -46,6 +49,9 @@ public:
         for (int i = 0; i < MAX_SIZE; ++i) {
             data[i] = 0.0; // Clear the buffer
         }
+    }
+    ~mv_average_filter() {
+    delete[] data; // You must add this to avoid memory leak
     }
 };
 

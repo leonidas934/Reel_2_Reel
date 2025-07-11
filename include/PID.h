@@ -55,9 +55,7 @@ float PID::output(float setpoint, float mes, long time)
 
   out = e+offset;
   
-   if (out > outMax) {out = outMax;}
-  else if (out < outMin) {out = outMin;}
-  
+  out = constrain(out, outMin, outMax);
   lastError = error;
   previousTime = currentTime;
   return out;

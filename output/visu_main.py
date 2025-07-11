@@ -68,13 +68,15 @@ def update():
         values = line.split(',')  
 
         if len(values) == 8:
-            time_ = round(float(values[0])/retard_temps, 1)
-            moving_speed_ = round(float(values[1])*dia_encoder*np.pi*retard_temps, 1)
-            speed_mes_ = round(float(values[2])*dia_encoder*np.pi*retard_temps, 1)
-            motor1_input_ = round(float(values[3]), 1)
-            motor2_input_ = round(float(values[4]), 1)
+            time_ = round(float(values[0])/retard_temps, 2)
+            moving_speed_ = round(float(values[1])*dia_encoder*np.pi*retard_temps, 3)
+            #moving_speed_ = round(float(values[1]), 3)
+            speed_mes_ = round(float(values[2])*dia_encoder*np.pi*retard_temps, 3)
+            #speed_mes_ = round(float(values[2]), 3)
+            motor1_input_ = round(float(values[3]), 3)
+            motor2_input_ = round(float(values[4]), 3)
             pos_des_ = float(values[5])
-            pos_ = round(float(values[6]), 1)
+            pos_ = round(float(values[6]), 3)
             test_ = float(values[7])
 
             time.append(time_)
