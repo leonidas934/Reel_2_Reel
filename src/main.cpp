@@ -1,7 +1,6 @@
 #include <Arduino.h>
 #include <TimerOne.h>
- 
-#include "linear_curve.h"
+
 #include "state_machine.h"
 #include "board.h"
 #include "pin.h"
@@ -10,7 +9,6 @@
 #include "speed_motor.h"
 #include "brake_motor.h"
 #include "params.h"
-#include "reel_2_reel_sys.h"
 
 
 Board _board;
@@ -18,17 +16,18 @@ Speed_motor speed_motor(_board, MAX_SPEED*gear_ratio);
 Breake_motor breake_motor(_board, MAX_TORQUE);
 
 state_machine kernel(_board);
-reel_2_reel_sys reel_2_reel;
 PID pos_controller(0,0.01,0,0, 90); // 90% de torque max
 //PID speed_controller(38,0.0271,35470,0, 450); // PID pour Vitesse_des = 50, 450 = 90% de MAX_speed
 //PID speed_controller(30,0.0065,15200,0, 450); // PID pour vitesse_des = 10
 double Kp_des = (Vitesse_des-10)/65*8+25;
-double Ki_des = (Vitesse_des-10)/65*0.0206+0.0065;
+double Ki_des = (Vitesse_des-10)/65*0.021+0.007;
 double Kd_des = (Vitesse_des-10)/65*20270+13000;
 PID speed_controller(Kp_des,Ki_des,Kd_des,0, 100); //Approx lineaire des deux PID
 
 mv_average_filter speed_filter(filter_size);
 double test = 0.0;
+unsigned long lastPrintTime = 0;
+const unsigned long printInterval = 50;  // Print every nb ms
 
 void encoder_step() {
  _board._encoder.step();
@@ -56,21 +55,21 @@ void change_direction(){
 }
 
 void print_results(double time, double moving_speed, double speed_smooth, double input_speed, double input_breake, double des_pos, double pos, double test){
-  Serial.print(time/1000);
+    Serial.print(time/1000, 4);
     Serial.print(" ,");
-    Serial.print(moving_speed);
+    Serial.print(moving_speed, 4);
     Serial.print(" ,");
-    Serial.print(speed_smooth);
+    Serial.print(speed_smooth, 4);
     Serial.print(" ,");
-    Serial.print(double(input_speed)/ICR4 *100);
+    Serial.print(double(input_speed)/ICR4 *100, 4);
     Serial.print(" ,");
-    Serial.print(double(input_breake)/ICR4 *100);
+    Serial.print(double(input_breake)/ICR4 *100, 4);
     Serial.print(" ,");
-    Serial.print(des_pos);
+    Serial.print(des_pos, 4);
     Serial.print(" ,");
-    Serial.print(pos);
+    Serial.print(pos, 4);
     Serial.print(" ,");
-    Serial.println(test);
+    Serial.println(test, 4);
 }
 
 
@@ -98,8 +97,11 @@ void print_results(double time, double moving_speed, double speed_smooth, double
     int input_breake_start_pos = breake_motor.get_dc(breake_des_start_pos);
     breake_motor.set(int(input_breake_start_pos));
     
-    print_results(millis()-kernel.start_time, 0, 0, 0, input_breake_start_pos, rest_pos, _board._pos_sensor.get_pos(), test);
-
+    unsigned long now = millis();
+    if (now - lastPrintTime >= printInterval ) { //print intervall = nb ms
+      lastPrintTime = now;
+      print_results(millis()-kernel.start_time, 0, 0, 0, input_breake_start_pos, rest_pos, _board._pos_sensor.get_pos(), test);
+    }
     break;
   }
     
@@ -114,14 +116,17 @@ void print_results(double time, double moving_speed, double speed_smooth, double
 
     double breake_des = pos_controller.output(des_pos, pos, time);
     double speed_des = speed_controller.output(moving_speed, speed_smooth, time);
-    double test = speed;
+    double test = time;
     int input_speed = speed_motor.get_dc(speed_des);
     int input_breake = breake_motor.get_dc(breake_des);
     speed_motor.set(int(input_speed));
     breake_motor.set(int(input_breake));
 
-
-    print_results(millis()-kernel.start_time, moving_speed, speed_smooth, input_speed, input_breake, des_pos, pos, test);
+    unsigned long now = millis();
+    if (now - lastPrintTime >= printInterval ) { //print intervall = nb ms
+      lastPrintTime = now;
+      print_results(millis()-kernel.start_time, moving_speed, speed_smooth, input_speed, input_breake, des_pos, pos, test);
+    }
     break;
     }
   }
@@ -131,7 +136,7 @@ void print_results(double time, double moving_speed, double speed_smooth, double
 
 
 void setup() {
-Serial.begin(9600);
+Serial.begin(115200);
 Timer1.initialize(lDt); 
 Timer1.attachInterrupt(main_loop);
 

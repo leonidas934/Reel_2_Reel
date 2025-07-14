@@ -3,11 +3,13 @@ import serial
 import csv
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtCore
+import datetime
 
 serial_port = "COM13"
-baud_rate = 9600
-dia_encoder = 5.7 #cm
-retard_temps = 0.9658 #s
+baud_rate = 115200 
+dia_encoder = 6.0 #cm
+#retard_temps = 0.9658 #s
+retard_temps = 1.0 #s
 
 try:
     ser = serial.Serial(serial_port, baud_rate)
@@ -48,7 +50,6 @@ plot3 = win.addPlot(row=1, col=1, title="pos")
 plot3.addLegend()
 curve3_pos_des = plot3.plot(pen='b', name="pos_des")
 curve3_pos = plot3.plot(pen='r', name="pos")
-#plot3.setYRange(-5, 25)
 
 time = []
 moving_speed = []
@@ -58,6 +59,11 @@ motor2_input = []
 pos_des = []
 pos = []
 test = []
+timeStamp = []
+delta = []
+timeStamp1 = datetime.datetime.now()
+retard = []
+
 
 def update():
     global time, moving_speed, speed_mes, motor1_input, motor2_input, pos_des, pos, test
@@ -68,15 +74,18 @@ def update():
         values = line.split(',')  
 
         if len(values) == 8:
-            time_ = round(float(values[0])/retard_temps, 2)
-            moving_speed_ = round(float(values[1])*dia_encoder*np.pi*retard_temps, 3)
-            #moving_speed_ = round(float(values[1]), 3)
-            speed_mes_ = round(float(values[2])*dia_encoder*np.pi*retard_temps, 3)
-            #speed_mes_ = round(float(values[2]), 3)
-            motor1_input_ = round(float(values[3]), 3)
-            motor2_input_ = round(float(values[4]), 3)
+            delta = datetime.datetime.now() - timeStamp1
+            timeStamp = delta.total_seconds()
+            time_ = float(values[0])/retard_temps
+            retard = timeStamp - time_
+            moving_speed_ = float(values[1])*dia_encoder*np.pi*retard_temps
+            #moving_speed_ = float(values[1])
+            speed_mes_ = float(values[2])*dia_encoder*np.pi*retard_temps
+            #speed_mes_ = float(values[2])
+            motor1_input_ = float(values[3])
+            motor2_input_ = float(values[4])
             pos_des_ = float(values[5])
-            pos_ = round(float(values[6]), 3)
+            pos_ = float(values[6])
             test_ = float(values[7])
 
             time.append(time_)
@@ -87,7 +96,7 @@ def update():
             pos_des.append(pos_des_)
             pos.append(pos_)
             test.append(test_)
-            print(f"{time_}, {moving_speed_}, {speed_mes_}, {motor1_input_}, {motor2_input_}, {pos_des_}, {pos_}, {test_}")
+            print(f"{timeStamp:.3f} | {time_} | {retard:.3f}, {moving_speed_}, {speed_mes_}, {motor1_input_}, {motor2_input_}, {pos_des_}, {pos_}, {test_}")
             #csv_writer.writerow([time_, moving_speed_, speed_mes_, motor1_input_, motor2_input_, pos_des_, pos_])
 
             max_points = 200
@@ -135,6 +144,7 @@ def update():
 timer = QtCore.QTimer()
 timer.timeout.connect(update)
 timer.start(50)
+
 
 if __name__ == '__main__':
     pg.exec()

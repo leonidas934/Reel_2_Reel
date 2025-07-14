@@ -3,7 +3,6 @@
 
 #include <Arduino.h>
 #include "motor.h"
-#include "linear_curve.h"
 #include "params.h"
 
 class Breake_motor : public Motor
