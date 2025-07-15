@@ -26,8 +26,11 @@ PID speed_controller(Kp_des,Ki_des,Kd_des,0, 100); //Approx lineaire des deux PI
 
 mv_average_filter speed_filter(filter_size);
 double test = 0.0;
-unsigned long lastPrintTime = 0;
-const unsigned long printInterval = 50;  // Print every nb ms
+unsigned long lastPrintTime = 0.0;
+const unsigned long printInterval = 100.0;  // Print every nb ms
+
+double speed_smooth;
+int input_speed;
 
 void encoder_step() {
  _board._encoder.step();
@@ -43,10 +46,6 @@ void change_state(){
     speed_filter.init();
 }
 
-void motor_feedback(){
-  // speed_motor.measure_feedback();
-}
-
 void change_direction(){
   if (kernel.state != off)
   {
@@ -57,17 +56,17 @@ void change_direction(){
 void print_results(double time, double moving_speed, double speed_smooth, double input_speed, double input_breake, double des_pos, double pos, double test){
     Serial.print(time/1000, 4);
     Serial.print(" ,");
-    Serial.print(moving_speed, 4);
+    Serial.print(moving_speed, 3);
     Serial.print(" ,");
-    Serial.print(speed_smooth, 4);
+    Serial.print(speed_smooth, 3);
     Serial.print(" ,");
     Serial.print(double(input_speed)/ICR4 *100, 4);
     Serial.print(" ,");
     Serial.print(double(input_breake)/ICR4 *100, 4);
     Serial.print(" ,");
-    Serial.print(des_pos, 4);
+    Serial.print(des_pos, 3);
     Serial.print(" ,");
-    Serial.print(pos, 4);
+    Serial.print(pos, 3);
     Serial.print(" ,");
     Serial.println(test, 4);
 }
@@ -76,6 +75,7 @@ void print_results(double time, double moving_speed, double speed_smooth, double
 
 
  void main_loop(){
+  unsigned long start = micros();
   switch (kernel.state)
   {
   case off:{
@@ -97,9 +97,8 @@ void print_results(double time, double moving_speed, double speed_smooth, double
     int input_breake_start_pos = breake_motor.get_dc(breake_des_start_pos);
     breake_motor.set(int(input_breake_start_pos));
     
-    unsigned long now = millis();
-    if (now - lastPrintTime >= printInterval ) { //print intervall = nb ms
-      lastPrintTime = now;
+    if (time - lastPrintTime >= printInterval ) { //print intervall = nb ms
+      lastPrintTime = time;
       print_results(millis()-kernel.start_time, 0, 0, 0, input_breake_start_pos, rest_pos, _board._pos_sensor.get_pos(), test);
     }
     break;
@@ -107,24 +106,23 @@ void print_results(double time, double moving_speed, double speed_smooth, double
     
 
   case running:{
+    unsigned long debut = micros();
     double time = kernel.get_time();
+    //if (time - lastPrintTime >= 100 ) { //100 ms for each loop
     double speed =_board._encoder.get_speed();
     speed_filter.push(speed);
-    double speed_smooth = speed_filter.get_average();
-    
-    double pos = _board._pos_sensor.get_pos();
-
-    double breake_des = pos_controller.output(des_pos, pos, time);
+    speed_smooth = speed_filter.get_average();
     double speed_des = speed_controller.output(moving_speed, speed_smooth, time);
-    double test = time;
-    int input_speed = speed_motor.get_dc(speed_des);
-    int input_breake = breake_motor.get_dc(breake_des);
+    input_speed = speed_motor.get_dc(speed_des);
     speed_motor.set(int(input_speed));
+    //}
+    double pos = _board._pos_sensor.get_pos();
+    double breake_des = pos_controller.output(des_pos, pos, time);
+    int input_breake = breake_motor.get_dc(breake_des);
     breake_motor.set(int(input_breake));
-
-    unsigned long now = millis();
-    if (now - lastPrintTime >= printInterval ) { //print intervall = nb ms
-      lastPrintTime = now;
+    double test = micros() - debut;
+    if (time - lastPrintTime >= printInterval ) { //print intervall = nb ms
+      lastPrintTime = time;
       print_results(millis()-kernel.start_time, moving_speed, speed_smooth, input_speed, input_breake, des_pos, pos, test);
     }
     break;

@@ -96,7 +96,7 @@ def update():
             pos_des.append(pos_des_)
             pos.append(pos_)
             test.append(test_)
-            print(f"{timeStamp:.3f} | {time_} | {retard:.3f}, {moving_speed_}, {speed_mes_}, {motor1_input_}, {motor2_input_}, {pos_des_}, {pos_}, {test_}")
+            print(f"{timeStamp:.3f} | {time_} | {retard:.3f} | {moving_speed_:.2f}, {speed_mes_:.2f}, {motor1_input_}, {motor2_input_}, {pos_des_}, {pos_}, {test_}")
             #csv_writer.writerow([time_, moving_speed_, speed_mes_, motor1_input_, motor2_input_, pos_des_, pos_])
 
             max_points = 200
@@ -124,14 +124,14 @@ def update():
                 print("System in resting position")
             
             #csv_writer.writerow([])
-            time.clear()
-            moving_speed.clear()
-            speed_mes.clear()
-            motor1_input.clear()
-            motor2_input.clear()
-            pos_des.clear()
-            pos.clear()
-            test.clear()
+            #time.clear()
+            #moving_speed.clear()
+            #speed_mes.clear()
+            #motor1_input.clear()
+            #motor2_input.clear()
+            #pos_des.clear()
+            #pos.clear()
+            #test.clear()
         
         elif line == "change dir":
             print(" Change dir ")

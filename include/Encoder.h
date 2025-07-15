@@ -33,7 +33,7 @@ public:
 };
 
 void Encoder::step() {
-    unsigned long current_time = millis();
+    unsigned long current_time = micros()/1000;
     pulse_interval = current_time - last_pulse_time;
     if (pulse_interval == 0) return;
     double pulse_speed = (60.0 * 1e3) / (double(pulses_per_rev) * pulse_interval);
