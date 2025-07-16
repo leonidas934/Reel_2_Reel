@@ -7,9 +7,6 @@ import datetime
 
 serial_port = "COM13"
 baud_rate = 115200 
-dia_encoder = 6.0 #cm
-#retard_temps = 0.9658 #s
-retard_temps = 1.0 #s
 
 try:
     ser = serial.Serial(serial_port, baud_rate)
@@ -74,14 +71,12 @@ def update():
         values = line.split(',')  
 
         if len(values) == 8:
-            delta = datetime.datetime.now() - timeStamp1
-            timeStamp = delta.total_seconds()
-            time_ = float(values[0])/retard_temps
-            retard = timeStamp - time_
-            moving_speed_ = float(values[1])*dia_encoder*np.pi*retard_temps
-            #moving_speed_ = float(values[1])
-            speed_mes_ = float(values[2])*dia_encoder*np.pi*retard_temps
-            #speed_mes_ = float(values[2])
+            #delta = datetime.datetime.now() - timeStamp1
+            #timeStamp = delta.total_seconds()
+            time_ = float(values[0])
+            #retard = timeStamp - time_
+            moving_speed_ = float(values[1])
+            speed_mes_ = float(values[2])
             motor1_input_ = float(values[3])
             motor2_input_ = float(values[4])
             pos_des_ = float(values[5])
@@ -96,7 +91,8 @@ def update():
             pos_des.append(pos_des_)
             pos.append(pos_)
             test.append(test_)
-            print(f"{timeStamp:.3f} | {time_} | {retard:.3f} | {moving_speed_:.2f}, {speed_mes_:.2f}, {motor1_input_}, {motor2_input_}, {pos_des_}, {pos_}, {test_}")
+            #print(f"{timeStamp:.3f} | {time_} | {retard:.3f} | {moving_speed_:.2f}, {speed_mes_:.2f}, {motor1_input_}, {motor2_input_}, {pos_des_}, {pos_}, {test_}")
+            print(f"{time_} | {moving_speed_:.2f}, {speed_mes_:.2f}, {motor1_input_}, {motor2_input_}, {pos_des_}, {pos_}, {test_}")
             #csv_writer.writerow([time_, moving_speed_, speed_mes_, motor1_input_, motor2_input_, pos_des_, pos_])
 
             max_points = 200
@@ -124,14 +120,15 @@ def update():
                 print("System in resting position")
             
             #csv_writer.writerow([])
-            #time.clear()
-            #moving_speed.clear()
-            #speed_mes.clear()
-            #motor1_input.clear()
-            #motor2_input.clear()
-            #pos_des.clear()
-            #pos.clear()
-            #test.clear()
+            ser.reset_input_buffer()  # Clear any partial data
+            time.clear()
+            moving_speed.clear()
+            speed_mes.clear()
+            motor1_input.clear()
+            motor2_input.clear()
+            pos_des.clear()
+            pos.clear()
+            test.clear()
         
         elif line == "change dir":
             print(" Change dir ")
@@ -143,7 +140,7 @@ def update():
 
 timer = QtCore.QTimer()
 timer.timeout.connect(update)
-timer.start(50)
+timer.start(100)
 
 
 if __name__ == '__main__':

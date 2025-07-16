@@ -11,7 +11,7 @@ const int filter_size = 11;
 
 // Utilisateur
 bool Etat_dir = false; //false = Masquer cote interieur de la bobine, True = masquer cote exterieur de la bobine
-double Vitesse_des = 60; // cm/min - Vitesse_max = 75 cm/min
+double Vitesse_des = 10; // cm/min - Vitesse_max = 75 cm/min
 double Tension_des = 40; // Tension entre 0 et 100
 
 // Speed- and Torque Motor params

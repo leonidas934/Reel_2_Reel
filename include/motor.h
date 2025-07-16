@@ -49,7 +49,7 @@ void Motor::enable(){
 
 
 int Motor::get_dc(double value){
-    return int(ICR4/MAX_VALUE *value); // = 10 000 / 100 * breake_des
+    return int(ICR4/MAX_VALUE *value); // = 10 000 / 100 * breake_des or 10 000 / 5 * speed_des
 }
 
 
