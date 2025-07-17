@@ -76,11 +76,11 @@ def update():
         if len(values) == 8:
             delta = datetime.datetime.now() - timeStamp1
             timeStamp = delta.total_seconds()
-            time_ = float(values[0])/retard_temps
+            time_ = float(values[0])
             retard = timeStamp - time_
-            moving_speed_ = float(values[1])*dia_encoder*np.pi*retard_temps
+            moving_speed_ = float(values[1])
             #moving_speed_ = float(values[1])
-            speed_mes_ = float(values[2])*dia_encoder*np.pi*retard_temps
+            speed_mes_ = float(values[2])
             #speed_mes_ = float(values[2])
             motor1_input_ = float(values[3])
             motor2_input_ = float(values[4])
@@ -124,14 +124,14 @@ def update():
                 print("System in resting position")
             
             #csv_writer.writerow([])
-            time.clear()
-            moving_speed.clear()
-            speed_mes.clear()
-            motor1_input.clear()
-            motor2_input.clear()
-            pos_des.clear()
-            pos.clear()
-            test.clear()
+            #time.clear()
+            #moving_speed.clear()
+            #speed_mes.clear()
+            #motor1_input.clear()
+            #motor2_input.clear()
+            #pos_des.clear()
+            #pos.clear()
+            #test.clear()
         
         elif line == "change dir":
             print(" Change dir ")

@@ -38,7 +38,8 @@ public:
     void init() {
 
         _pwm.innit();
-        _encoder.innit();
+        _encoder.begin();
+        _encoder.reset();
         _pos_sensor.innit();
         pinMode(13, OUTPUT); 
         

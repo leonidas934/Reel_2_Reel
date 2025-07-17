@@ -2,93 +2,74 @@
 #define ENCODER_H
 
 #include <Arduino.h>
-#include "buffer.h"
 
-
-
-
-class Encoder
-{
+class Encoder {
 private:
-public:
-    const int A_pin;  
+    const int A_pin;
     const int B_pin;
-    int count;
-    double speed;
+    const int pulses_per_rev = 2048;
 
-    const int pulses_per_rev = 2048; 
-    buffer _buffer;
-    unsigned long last_pulse_time;
-    long pulse_interval;
-    
-    
+    static const int BUFFER_SIZE = 10;
+    volatile unsigned long intervals[BUFFER_SIZE];
+    volatile int buffer_index = 0;
+    volatile int interval_count = 0;
+
+    volatile unsigned long last_pulse_time = 0;
+
+public:
     Encoder(int A_pin, int B_pin);
-    
-    void step();
+    void begin();
     double get_speed();
-    void innit();
-    int get_puls_count();
-    int get_puls_sum();
-    int get_pulse_interval();
+    void reset();
+    void handlePulse();
 };
 
-void Encoder::step() {
-    unsigned long current_time = millis();
-    pulse_interval = current_time - last_pulse_time;
-    if (pulse_interval == 0) return;
-    double pulse_speed = (60.0 * 1e3) / (double(pulses_per_rev) * pulse_interval);
-    
-    last_pulse_time = current_time;
+Encoder* global_encoder_pointer = nullptr;
 
-    if (digitalRead(B_pin) == LOW) {
-        _buffer.add(pulse_speed);  
-    } else {
-        _buffer.add(pulse_speed);
-    }
-}
+Encoder::Encoder(int A_pin, int B_pin) : A_pin(A_pin), B_pin(B_pin) {}
 
-Encoder::Encoder(int A_pin, int B_pin) 
-    : A_pin(A_pin), B_pin(B_pin)
-{
-    _buffer = buffer();
+void Encoder::begin() {
     pinMode(A_pin, INPUT);
     pinMode(B_pin, INPUT);
-    count = 0;
+    global_encoder_pointer = this;
+    attachInterrupt(digitalPinToInterrupt(A_pin), []() {
+        global_encoder_pointer->handlePulse();
+    }, RISING);
 }
 
-
-
-double Encoder::get_speed(){
-    double average_speed = _buffer.get_average();
-    if (average_speed == 0.0)
-    {
-    return 0.0;}
-    else
-    {
-    _buffer.clear();
-    return average_speed;
+void Encoder::handlePulse() {
+    unsigned long current_time = micros();
+    if (last_pulse_time != 0) {
+        unsigned long interval = current_time - last_pulse_time;
+        intervals[buffer_index] = interval;
+        buffer_index = (buffer_index + 1) % BUFFER_SIZE;
+        if (interval_count < BUFFER_SIZE) interval_count++;
     }
+    last_pulse_time = current_time;
+}
+
+double Encoder::get_speed() {
+    noInterrupts();
+    unsigned long total_interval = 0;
+    for (int i = 0; i < interval_count; i++) {
+        total_interval += intervals[i];
+    }
+    int count_copy = interval_count;
+    interrupts();
+
+    if (count_copy == 0 || total_interval == 0) return 0.0;
     
-    
+    double average_interval = (double)total_interval / count_copy;
+    double speed = (60.0 * 1000000.0) / (pulses_per_rev * average_interval);
+    return speed;
 }
 
-int Encoder::get_puls_count(){
-    return _buffer.get_count();
-}
-
-int Encoder::get_puls_sum(){
-    return _buffer.get_sum();
-}
-
-int Encoder::get_pulse_interval(){
-    return pulse_interval;
-}
-
-void Encoder::innit(){
+void Encoder::reset() {
+    noInterrupts();
+    buffer_index = 0;
+    interval_count = 0;
     last_pulse_time = 0;
-    _buffer.clear();
+    interrupts();
 }
-
 
 #endif
-
