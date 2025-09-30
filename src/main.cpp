@@ -52,12 +52,12 @@ void change_direction(){
   }
 }
 
-void print_results(double time, double moving_speed, double speed_smooth, double input_speed, double input_breake, double des_pos, double pos, double test){
+void print_results(double time, double moving_speed, double speed, double input_speed, double input_breake, double des_pos, double pos, double test){
     Serial.print(time/1000/retard_temps, 4);
     Serial.print(" ,");
     Serial.print(moving_speed*dia_encoder*M_PI*retard_temps, 4);
     Serial.print(" ,");
-    Serial.print(speed_smooth*dia_encoder*M_PI*retard_temps, 4);
+    Serial.print(speed*dia_encoder*M_PI*retard_temps, 4);
     Serial.print(" ,");
     Serial.print(double(input_speed)/ICR4 *100, 4);
     Serial.print(" ,");
@@ -92,7 +92,7 @@ void print_results(double time, double moving_speed, double speed_smooth, double
     double time = kernel.get_time();
 
     double breake_des_start_pos = pos_controller.output(rest_pos, _board._pos_sensor.get_pos(), time);
-    int input_breake_start_pos = breake_motor.get_dc(breake_des_start_pos);
+    int input_breake_start_pos = breake_motor.get_dc(25);
     breake_motor.set(int(input_breake_start_pos));
     
     unsigned long now = millis();
@@ -113,14 +113,14 @@ void print_results(double time, double moving_speed, double speed_smooth, double
       //speed_filter.push(speed);
       //double speed_smooth = speed_filter.get_average();
       double speed_des = speed_controller.output(moving_speed, speed, time);
-      input_speed = speed_motor.get_dc(speed_des);
+      input_speed = speed_motor.get_dc(40);
       speed_motor.set(int(input_speed));
     }
 
     double pos = _board._pos_sensor.get_pos();
     double breake_des = pos_controller.output(des_pos, pos, time);
-    double test = time;
-    int input_breake = breake_motor.get_dc(breake_des);
+    double test = lastSpeedTime;
+    int input_breake = breake_motor.get_dc(25);
     breake_motor.set(int(input_breake));
 
     if (now - lastPrintTime >= printInterval ) { //print intervall = nb ms

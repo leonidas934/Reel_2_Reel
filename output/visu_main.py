@@ -9,7 +9,7 @@ serial_port = "COM13"
 baud_rate = 115200 
 dia_encoder = 6.0 #cm
 #retard_temps = 0.9658 #s
-retard_temps = 1.0 #s
+retard_temps = 1.0 #spip install -r requirements.txt
 
 try:
     ser = serial.Serial(serial_port, baud_rate)
